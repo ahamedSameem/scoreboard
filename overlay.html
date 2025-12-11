@@ -2,6 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<title>Badminton Scoreboard</title>
+
 <style>
 body {
   margin: 0;
@@ -13,7 +15,7 @@ body {
   position: absolute;
   top: 40px;
   left: 40px;
-  width: 300px;
+  width: 350px;
   z-index: 2;
   font-size: 13px;
 }
@@ -22,7 +24,6 @@ body {
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  width: 100%;
 }
 .player-row {
   display: flex;
@@ -32,11 +33,10 @@ body {
 }
 .player-row:last-child { border-bottom: none; }
 .player-info {
-  flex: 1 1 auto;
+  flex: 1;
   padding: 0 6px;
   display: flex;
   align-items: center;
-  min-width: 0;
 }
 .player-name {
   font-weight: bold;
@@ -55,122 +55,144 @@ body {
   font-weight: bold;
   font-size: 16px;
   color: white;
-  position: relative;
   margin-left: 4px;
   border-radius: 4px;
-  background-color: #2196F3; /* default set box color */
+  background-color: #2196F3;
 }
-.score-section.active-set { border: 2px solid yellow; } /* highlight active set */
+.score-section.active-set { border: 2px solid yellow; }
 .score-section.winning { background-color: #4CAF50; }
 .score-section.losing { background-color: #9E9E9E; }
-/* Cock image style */
-.player-info img.cock {
+.cock {
+  width: 16px;
+  height: 16px;
   background-color: #9E9E9E;
   border-radius: 2px;
-  transition: all 0.3s ease;
+  margin-left: 6px;
+  display: none;
 }
 </style>
 </head>
+
 <body>
+
 <div class="overlay">
   <div class="scoreboard">
-    <!-- Left Team -->
+
+    <!-- LEFT TEAM -->
     <div class="player-row">
-      <img id="flagLeft" src="images/Afghanistan.png" alt="Left Flag" width="36" height="24">
+      <img id="flagLeft" src="" width="36" height="24">
       <div class="player-info">
-        <div class="player-name" id="nameLeft">Team A</div>
-        <img id="cockLeft" class="cock" src="cock/cock_a.png" width="16" height="16" style="margin-left:6px; display:none;">
+        <div id="nameLeft" class="player-name">Team A</div>
+        <img id="cockLeft" class="cock" src="https://cdn-icons-png.flaticon.com/512/1598/1598740.png">
       </div>
-      <div class="score-section" id="set1Left">0</div>
-      <div class="score-section" id="set2Left" style="display:none;">0</div>
-      <div class="score-section" id="set3Left" style="display:none;">0</div>
+
+      <div id="set1Left" class="score-section">0</div>
+      <div id="set2Left" class="score-section" style="display:none;">0</div>
+      <div id="set3Left" class="score-section" style="display:none;">0</div>
     </div>
-    <!-- Right Team -->
+
+    <!-- RIGHT TEAM -->
     <div class="player-row">
-      <img id="flagRight" src="images/Albania.png" alt="Right Flag" width="36" height="24">
+      <img id="flagRight" src="" width="36" height="24">
       <div class="player-info">
-        <div class="player-name" id="nameRight">Team B</div>
-        <img id="cockRight" class="cock" src="cock/cock_b.png" width="16" height="16" style="margin-left:6px; display:none;">
+        <div id="nameRight" class="player-name">Team B</div>
+        <img id="cockRight" class="cock" src="https://cdn-icons-png.flaticon.com/512/1598/1598740.png">
       </div>
-      <div class="score-section" id="set1Right">0</div>
-      <div class="score-section" id="set2Right" style="display:none;">0</div>
-      <div class="score-section" id="set3Right" style="display:none;">0</div>
+
+      <div id="set1Right" class="score-section">0</div>
+      <div id="set2Right" class="score-section" style="display:none;">0</div>
+      <div id="set3Right" class="score-section" style="display:none;">0</div>
     </div>
+
   </div>
 </div>
 
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
 <script>
+// YOUR FIREBASE CONFIG (Correct)
+var firebaseConfig = {
+  apiKey: "AIzaSyADGPtJxl-HrEhQlwnEUDF0DJyz1xHQcE0",
+  authDomain: "scoreboard-2134f.firebaseapp.com",
+  databaseURL: "https://scoreboard-2134f-default-rtdb.firebaseio.com",
+  projectId: "scoreboard-2134f",
+  storageBucket: "scoreboard-2134f.firebasestorage.app",
+  messagingSenderId: "921556967860",
+  appId: "1:921556967860:web:4cfed77fe01c59ca1b12e1",
+  measurementId: "G-DJ3G2XPKMF"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.database().ref("scoreboard");
 let currentSet = 1;
 
-async function updateScores() {
-  try {
-    const response = await fetch("http://127.0.0.1:5000/get_scores", { cache: "no-store" });
-    const data = await response.json();
+db.on("value", snapshot => {
+  const data = snapshot.val();
+  if (!data) return;
 
-    currentSet = data.current_set;
+  currentSet = data.current_set;
 
-    // Update names and flags
-    document.getElementById("nameLeft").innerText = data.team_info.left.name;
-    document.getElementById("nameRight").innerText = data.team_info.right.name;
-    document.getElementById("flagLeft").src = data.team_info.left.flag + "?t=" + new Date().getTime();
-    document.getElementById("flagRight").src = data.team_info.right.flag + "?t=" + new Date().getTime();
+  // Team Names
+  nameLeft.innerText = data.team_info.left.name;
+  nameRight.innerText = data.team_info.right.name;
 
-    // Show cock on serving team
-    document.getElementById("cockLeft").style.display = data.server === "left" ? "inline-block" : "none";
-    document.getElementById("cockRight").style.display = data.server === "right" ? "inline-block" : "none";
+  // Flags (force refresh)
+  flagLeft.src = data.team_info.left.flag + "?t=" + Date.now();
+  flagRight.src = data.team_info.right.flag + "?t=" + Date.now();
 
-    // Update set scores and highlight active set
-    for (let i = 1; i <= 3; i++) {
-      const leftBox = document.getElementById(`set${i}Left`);
-      const rightBox = document.getElementById(`set${i}Right`);
+  // Service Indicators
+  cockLeft.style.display  = data.server === "left"  ? "inline-block" : "none";
+  cockRight.style.display = data.server === "right" ? "inline-block" : "none";
 
-      // Only show sets up to currentSet
-      if (i <= currentSet) {
-        leftBox.style.display = "flex";
-        rightBox.style.display = "flex";
-      } else {
-        leftBox.style.display = "none";
-        rightBox.style.display = "none";
-        continue;
-      }
+  // SET SCORE HANDLING
+  for (let i = 1; i <= 3; i++) {
+    const leftBox  = document.getElementById(`set${i}Left`);
+    const rightBox = document.getElementById(`set${i}Right`);
 
-      leftBox.innerText = data.sets[i].left;
-      rightBox.innerText = data.sets[i].right;
-
-      // Highlight active set
-      if (i === currentSet) {
-        leftBox.classList.add("active-set");
-        rightBox.classList.add("active-set");
-      } else {
-        leftBox.classList.remove("active-set");
-        rightBox.classList.remove("active-set");
-      }
-
-      // Highlight winning/losing for set
-      if (data.sets[i].left > data.sets[i].right) {
-        leftBox.classList.add("winning");
-        leftBox.classList.remove("losing");
-        rightBox.classList.add("losing");
-        rightBox.classList.remove("winning");
-      } else if (data.sets[i].right > data.sets[i].left) {
-        leftBox.classList.add("losing");
-        leftBox.classList.remove("winning");
-        rightBox.classList.add("winning");
-        rightBox.classList.remove("losing");
-      } else {
-        leftBox.classList.remove("winning", "losing");
-        rightBox.classList.remove("winning", "losing");
-      }
+    // Show only up to current set
+    if (i <= currentSet) {
+      leftBox.style.display = "flex";
+      rightBox.style.display = "flex";
+    } else {
+      leftBox.style.display = "none";
+      rightBox.style.display = "none";
+      continue;
     }
 
-  } catch (err) {
-    console.error("Failed to fetch scores:", err);
-  }
-}
+    // Correct JSON access (string keys)
+    let leftScore  = data.sets[String(i)].left;
+    let rightScore = data.sets[String(i)].right;
 
-// Refresh every 1 second
-setInterval(updateScores, 1000);
-updateScores();
+    leftBox.innerText  = leftScore;
+    rightBox.innerText = rightScore;
+
+    // Active Set Highlight
+    if (i === currentSet) {
+      leftBox.classList.add("active-set");
+      rightBox.classList.add("active-set");
+    } else {
+      leftBox.classList.remove("active-set");
+      rightBox.classList.remove("active-set");
+    }
+
+    // Winner Coloring
+    leftBox.classList.remove("winning", "losing");
+    rightBox.classList.remove("winning", "losing");
+
+    if (leftScore > rightScore) {
+      leftBox.classList.add("winning");
+      rightBox.classList.add("losing");
+    } else if (rightScore > leftScore) {
+      leftBox.classList.add("losing");
+      rightBox.classList.add("winning");
+    }
+  }
+});
 </script>
+
 </body>
 </html>
