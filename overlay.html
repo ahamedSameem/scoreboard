@@ -107,13 +107,12 @@ body {
   </div>
 </div>
 
-
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
-// YOUR FIREBASE CONFIG (Correct)
+// 🔹 Firebase config
 var firebaseConfig = {
   apiKey: "AIzaSyADGPtJxl-HrEhQlwnEUDF0DJyz1xHQcE0",
   authDomain: "scoreboard-2134f.firebaseapp.com",
@@ -124,11 +123,18 @@ var firebaseConfig = {
   appId: "1:921556967860:web:4cfed77fe01c59ca1b12e1",
   measurementId: "G-DJ3G2XPKMF"
 };
-
 firebase.initializeApp(firebaseConfig);
 
 const db = firebase.database().ref("scoreboard");
 let currentSet = 1;
+
+// 🔹 DOM Elements
+const nameLeft = document.getElementById("nameLeft");
+const nameRight = document.getElementById("nameRight");
+const flagLeft = document.getElementById("flagLeft");
+const flagRight = document.getElementById("flagRight");
+const cockLeft = document.getElementById("cockLeft");
+const cockRight = document.getElementById("cockRight");
 
 db.on("value", snapshot => {
   const data = snapshot.val();
@@ -163,7 +169,7 @@ db.on("value", snapshot => {
       continue;
     }
 
-    // Correct JSON access (string keys)
+    // Get scores
     let leftScore  = data.sets[String(i)].left;
     let rightScore = data.sets[String(i)].right;
 
